@@ -2,6 +2,7 @@ package com.redhat;
 
 import io.quarkus.logging.Log;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -25,10 +26,13 @@ public class GreetingResource {
         return message;
     }
 
-
     @POST
+    @Transactional
     public String helloSomeone(final String name) {
         Log.debug("helloSomeone called with name: " + name);
-        return greetingGenerator.generateGreeting(name);
+        String greetingMessage = greetingGenerator.generateGreeting(name);
+        Greeting greeting = new Greeting(name, greetingMessage);
+        greeting.persist();
+        return greetingMessage;
     }
 }
